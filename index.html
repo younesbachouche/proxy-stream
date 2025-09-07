@@ -1,58 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>M3U8 Proxy Player</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { margin:0; background:#0d1117; display:flex; flex-direction:column; align-items:center; color:white; font-family:Arial,sans-serif; padding:20px; }
-    video { width:90%; max-width:960px; aspect-ratio:16/9; background:black; border-radius:12px; border:2px solid #333; margin-bottom:20px; }
-    .channels { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
-    .channels button { padding:10px 15px; border:none; border-radius:8px; background:#1db954; color:white; font-weight:bold; cursor:pointer; }
-    .channels button:hover { background:#14833b; }
-  </style>
+<meta charset="utf-8" />
+<title>M3U8 Proxy Player</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  body{margin:0;background:#0d1117;color:#fff;font-family:Arial;padding:20px;display:flex;flex-direction:column;align-items:center}
+  video{width:90%;max-width:960px;aspect-ratio:16/9;background:#000;border-radius:12px;margin-bottom:16px}
+  .channels{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  button{padding:10px 14px;border:0;border-radius:8px;background:#1db954;color:#fff;cursor:pointer}
+</style>
 </head>
 <body>
-  <h2>M3U8 Proxy Player (Render)</h2>
-  <video id="video" controls autoplay></video>
-
+  <h2>M3U8 Proxy Player</h2>
+  <video id="video" controls></video>
   <div class="channels" id="channels"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
-    const video = document.getElementById("video");
-
+    const video = document.getElementById('video');
     const channels = [
-      { name: "Achour TV", url: "https://hz.achourtv.com/bn2.m3u8" },
-      { name: "Dupereasy", url: "https://laaaaaaaal.dupereasy.com/eventk/premium130" },
-      { name: "Test Stream", url: "https://laaaaaaaal.dupereasy.com/getEvent/32.m3u8" }
+      { name: "Test stream", url: "https://laaaaaaaal.dupereasy.com/getEvent/537.m3u8" }
     ];
 
-    const container = document.getElementById("channels");
+    const container = document.getElementById('channels');
     channels.forEach(ch => {
-      const btn = document.createElement("button");
+      const btn = document.createElement('button');
       btn.textContent = ch.name;
-      btn.onclick = () => playStream(ch.url);
+      btn.onclick = () => play(ch.url);
       container.appendChild(btn);
     });
 
-    function playStream(rawUrl) {
-      const proxiedUrl = "/proxy?url=" + encodeURIComponent(rawUrl);
-
+    function play(rawUrl) {
+      const proxied = "/proxy?url=" + encodeURIComponent(rawUrl);
       if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.loadSource(proxiedUrl);
+        hls.loadSource(proxied);
         hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = proxiedUrl;
-        video.addEventListener("loadedmetadata", () => video.play());
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(()=>{}));
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = proxied;
+        video.play().catch(()=>{});
       } else {
-        alert("HLS not supported in this browser");
+        alert("HLS not supported");
       }
     }
 
-    playStream(channels[0].url);
+    // auto-play from ?url= parameter
+    const params = new URLSearchParams(location.search);
+    const url = params.get('url');
+    if (url) {
+      play(url);
+    } else {
+      // play first channel by default
+      play(channels[0].url);
+    }
   </script>
 </body>
 </html>
