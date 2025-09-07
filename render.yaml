@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: m3u8-proxy-player
+    env: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    branch: main
